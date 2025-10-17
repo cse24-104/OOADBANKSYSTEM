@@ -7,10 +7,10 @@ public class ChequeAccount extends Account {
         this.employer = employer;
         this.companyAddress = companyAddress;
 
-        //verify customer is employed
-        if (!customer.isEmployed()){
-            throw  new IllegalArgumentException("Cheque account can only be opened for employed customers");
-        }
+    }
+
+    public ChequeAccount(double balance, String accountNumber, Customer customer, String branch, String employer, String address) {
+        super();
     }
 
     @Override

@@ -1,5 +1,3 @@
-import java.io.Serializable;
-
 public class InvestmentAccount extends Account implements InterestBearing{
     public InvestmentAccount(double initialBalance, String accountNumber, Customer customer, String branch) {
         super(initialBalance, accountNumber, customer, branch);
@@ -31,10 +29,11 @@ public class InvestmentAccount extends Account implements InterestBearing{
     }
 
     @Override
-    public void applyInterest() {
+    public double applyInterest() {
         double interest = balance * 0.05;//0.05% monthly interest
         balance = balance + interest;
         System.out.println("Applied Interest of " + interest + "to Investment Account. New balance: " + balance);
 
+        return interest;
     }
 }
