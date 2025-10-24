@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="466.0" prefWidth="529.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.thesystem.boundary.LoginController">
+    <children>
+        <VBox layoutX="147.0" layoutY="137.0" prefHeight="190.0" prefWidth="332.0" spacing="15" AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="137.0">
+            <Label prefHeight="45.0" prefWidth="142.0" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Bank Login" />
+            <GridPane hgap="10" vgap="10">
+                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="usernameField" prefHeight="26.0" prefWidth="123.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <PasswordField fx:id="passwordField" prefHeight="26.0" prefWidth="43.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <columnConstraints>
+               <ColumnConstraints />
+               <ColumnConstraints />
+            </columnConstraints>
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
+            </GridPane>
+            <HBox prefHeight="34.0" prefWidth="318.0" spacing="10">
+                <Button fx:id="loginButton" text="Login" />
+                <Button fx:id="registerButton" text="Register" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

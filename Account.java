@@ -1,67 +1,48 @@
-import java.util.Scanner;
-import java.time.LocalDate;
+package com.example.thesystem;
+import com.example.thesystem.Customer;
 
-//abstract Account class
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Account {
     String accountNumber;
     double balance;
     String branch;
     Customer customer;
-    LocalDate openDate;
+    protected List<String> transactions = new ArrayList<>();
 
-    public Account(double initialBalance, String accountNumber, Customer customer, String branch) {
+    public Account(String accountNumber, String branch, Customer customer) {
         this.accountNumber = accountNumber;
-        this.balance = initialBalance;
         this.branch = branch;
         this.customer = customer;
-        this.openDate = LocalDate.now();
+        this.balance = 0.0;
     }
 
-    public Account() {
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
-    }
+    public double getBalance() { return balance; }
+    public void setBalance(double balance) { this.balance = balance; }
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+    public String getBranch() { return branch; }
+    public void setBranch(String branch) { this.branch = branch; }
 
-    public double getBalance() {
-        return balance;
-    }
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
 
-    public String getBranch() {
-        return branch;
-    }
-    public void setBranch(String branch) {
-        this.branch = branch;
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            transactions.add("Deposited BWP" + amount);
+        }
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
+    public abstract void withdraw(double amount);
 
-    public LocalDate getOpenDate() {
-        return openDate;
-    }
-    public void setOpenDate(LocalDate openDate) {
-        this.openDate = openDate;
-    }
+    public List<String> getTransactions() { return transactions; }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[accountNumber=" + accountNumber + ", balance=" + balance + ", branch=" + branch+"]";
+        return accountNumber + " (BWP" + balance + ")";
     }
-
-    public abstract boolean withdraw(double amount);
-
-    public abstract void deposit(double amount);
 }

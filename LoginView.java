@@ -1,62 +1,68 @@
-import javafx.application.Application;
+package com.example.thesystem.boundary;
+
+import com.example.thesystem.RegisterCustomerView;
+import com.example.thesystem.boundary.DashboardView;
+import com.example.thesystem.BankDatabase;
+import com.example.thesystem.controller.SceneController;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
-public class LoginView extends Application {
+public class LoginView extends VBox {
+    private TextField usernameField;
+    private PasswordField passwordField;
+    private Button loginButton;
+    private Button registerButton; // new
 
-    @Override
-    public void start(Stage stage) {
-        stage.setTitle("🏦 SmartBank Login");
+    public LoginView() {
+        setSpacing(10);
+        setPadding(new Insets(20));
 
-        // --- UI Components ---
-        Label title = new Label("SmartBank System");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
+        Text title = new Text("Login");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        Label userLabel = new Label("Username:");
-        TextField usernameField = new TextField();
-        usernameField.setPromptText("Enter username");
+        usernameField = new TextField();
+        usernameField.setPromptText("Username");
 
-        Label passLabel = new Label("Password:");
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Enter password");
+        passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
 
-        Button loginBtn = new Button("Login");
-        Label message = new Label();
+        loginButton = new Button("Login");
+        registerButton = new Button("Register"); // new
 
-        // --- Layout ---
-        VBox box = new VBox(10, title, userLabel, usernameField, passLabel, passwordField, loginBtn, message);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(20));
-        box.setStyle("-fx-background-color: linear-gradient(to bottom right, #e0f7fa, #ffffff);");
+        getChildren().addAll(title, usernameField, passwordField, loginButton, registerButton);
 
-        Scene loginScene = new Scene(box, 400, 350);
-        stage.setScene(loginScene);
-        stage.show();
-
-        // --- Login Logic ---
-        loginBtn.setOnAction(e -> {
+        // Login action
+        loginButton.setOnAction(e -> {
             String username = usernameField.getText();
             String password = passwordField.getText();
 
-            if (username.equals("admin") && password.equals("12345")) {
-                message.setText("✅ Login successful!");
-                BankApp bankApp = new BankApp();
-                try {
-                    bankApp.start(stage); // load main banking GUI
-                } catch (Exception ex) {
-                    message.setText("⚠️ Failed to open dashboard: " + ex.getMessage());
-                }
+            if (BankDatabase.login(username, password)) {
+                Scene dashboardScene = new Scene(new com.example.thesystem.boundary.DashboardView(), 400, 400);
+                SceneController.setScene(dashboardScene);
             } else {
-                message.setText("❌ Invalid username or password!");
+                showAlert("Invalid username or password");
             }
+        });
+
+        // Register action
+        registerButton.setOnAction(e -> {
+            Scene registerScene = new Scene(new RegisterCustomerView(), 400, 400);
+            SceneController.setScene(registerScene);
         });
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public String getUsername() { return usernameField.getText(); }
+    public String getPassword() { return passwordField.getText(); }
+    public Button getLoginButton() { return loginButton; }
+    public Button getRegisterButton() { return registerButton; }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

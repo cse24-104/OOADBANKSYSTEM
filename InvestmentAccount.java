@@ -1,39 +1,30 @@
-public class InvestmentAccount extends Account implements InterestBearing{
-    public InvestmentAccount(double initialBalance, String accountNumber, Customer customer, String branch) {
-        super(initialBalance, accountNumber, customer, branch);
-        if (initialBalance < 500){
-            throw new IllegalArgumentException("Investment account requires minimum BW500.00 initial deposit");
+package com.example.thesystem;
+
+import com.example.thesystem.InterestBearing;
+import com.example.thesystem.Account;
+import com.example.thesystem.Customer;
+
+public class InvestmentAccount extends Account implements InterestBearing {
+
+    public InvestmentAccount(String accountNumber, String branch, Customer customer, double initialDeposit) {
+        super(accountNumber, branch, customer);
+        if (initialDeposit >= 500.0) {
+            deposit(initialDeposit);
+        } else {
+            throw new IllegalArgumentException("Minimum deposit for Investment Account is BWP500.00");
         }
     }
 
     @Override
-    public boolean withdraw(double amount) {
-        if (amount > 0 && amount <=balance) {
-            balance = balance - amount;
-            System.out.println("Withdrew: " + amount + "From Investment Account. New balance: " + balance);
-            return true;
-        }else{
-            System.out.println("Invalid withdrawal amount");
-            return false;
-        }
+    public void applyInterest() {
+        balance += balance * 0.05; // 5%
     }
 
     @Override
-    public void deposit(double amount) {
-        if (amount > 0) {
-            balance = balance + amount;
-            System.out.println("Deposited: " + amount + "to Investment Account. New balance: " + balance);
-        }else{
-            System.out.println("Invalid deposit amount");
+    public void withdraw(double amount) {
+        if (amount <= balance) {
+            balance -= amount;
+            transactions.add("Withdrew BWP" + amount);
         }
-    }
-
-    @Override
-    public double applyInterest() {
-        double interest = balance * 0.05;//0.05% monthly interest
-        balance = balance + interest;
-        System.out.println("Applied Interest of " + interest + "to Investment Account. New balance: " + balance);
-
-        return interest;
     }
 }

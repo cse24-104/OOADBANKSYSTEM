@@ -1,86 +1,42 @@
-import java.time.LocalDate;
+package com.example.thesystem;
+
+import com.example.thesystem.Account;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Customer {
-    int id;
-    String firstname;
-    String surname;
-    String address;
-    String phone;
-    String email;
+    protected String firstName;
+    protected String lastName;
+    protected String address;
+    protected int phoneNumber;
+    protected String email;
+    protected List<Account> accounts = new ArrayList<>();
 
-    public Customer(int id, String firstname, String surname, String address, String phone) {
-        this.id = id;
-        this.firstname = firstname;
-        this.surname = surname;
+    public Customer(String firstName, String lastName, String address, int phoneNumber, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.address = address;
-        this.phone = phone;
+        this.phoneNumber = phoneNumber;
         this.email = email;
     }
 
-    public Customer(String firstname, String address) {
-    }
+    public Customer() { }
 
-    public Customer(String name) {
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public Customer(String name, String address, String contactNumber) {
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public Customer(String name, String id, LocalDate dob, String address, String phone) {
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public int getId() {
-        return id;
-    }
+    public int getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(int phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public abstract String getCustomerType();
-
-    @Override
-    public String toString(){
-        return firstname + " " + surname + " " + address + " " + phone;
-    }
+    public void addAccount(Account account) { accounts.add(account); }
+    public List<Account> getAccounts() { return accounts; }
 }

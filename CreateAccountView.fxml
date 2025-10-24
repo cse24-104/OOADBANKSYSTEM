@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="582.0" prefWidth="628.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.thesystem.boundary.CreateAccountController">
+    <children>
+        <VBox alignment="CENTER" prefHeight="462.0" prefWidth="588.0" spacing="10" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+            <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Create New Account" />
+
+            <ComboBox fx:id="accountTypeBox" promptText="Select Account Type" />
+            <TextField fx:id="branchField" alignment="CENTER" prefHeight="26.0" prefWidth="480.0" promptText="Branch" />
+            <TextField fx:id="initialDepositField" alignment="CENTER" prefHeight="26.0" prefWidth="298.0" promptText="Initial Deposit" />
+            <TextField fx:id="employerNameField" alignment="CENTER" prefHeight="26.0" prefWidth="394.0" promptText="Employer Name (Cheque)" />
+            <TextField fx:id="employerAddressField" alignment="CENTER" promptText="Employer Address (Cheque)" />
+
+            <HBox spacing="10" />
+             <Button fx:id="createButton" text="Create Account" />
+             <Button fx:id="backButton" text="Back" />
+        </VBox>
+    </children>
+</AnchorPane>

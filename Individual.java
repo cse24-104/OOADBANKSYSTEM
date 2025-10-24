@@ -1,21 +1,31 @@
+package com.example.thesystem;
+import com.example.thesystem.Account;
+import com.example.thesystem.Customer;
 
 public class Individual extends Customer {
-    private String nationalId;
+    private int customerID;
     private String dateOfBirth;
+    private String gender;
+    private String maritalStatus;
+    private String password;
+    private String username;
 
-    public Individual(String name, String address, String contactNumber, String nationalId, String dateOfBirth) {
-        super(name, address, contactNumber);
-        this.nationalId = nationalId;
+    public Individual(String firstName, String lastName, String address, int phoneNumber, String email,
+                      int customerID, String dateOfBirth, String gender, String maritalStatus,
+                      String username, String password) {
+        super(firstName, lastName, address, phoneNumber, email);
+        this.customerID = customerID;
         this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.maritalStatus = maritalStatus;
+        this.username = username;
+        this.password = password;
     }
 
-    @Override
-    public String getCustomerType() {
-        return "Individual";
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + ", National ID: " + nationalId + ", Date of Birth: " + dateOfBirth;
-    }
+    public int getCustomerID() { return customerID; }
+    public String getDateOfBirth() { return dateOfBirth; }
+    public String getGender() { return gender; }
+    public String getMaritalStatus() { return maritalStatus; }
+    public String getPassword() { return password; }
+    public String getUsername() { return username; }
 }

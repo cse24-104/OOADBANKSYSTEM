@@ -1,33 +1,82 @@
+package com.example.thesystem.boundary;
+
+import com.example.thesystem.Account;
+import com.example.thesystem.controller.SceneController;
+import com.example.thesystem.boundary.DashboardView;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.scene.layout.VBox;
 
-public class AccountView {
-    private Account account;
+public class AccountView extends VBox {
+    private Label accountNumberLabel;
+    private Label balanceLabel;
+    private TextField amountField;
+    private Button depositButton;
+    private Button withdrawButton;
+    private Button backButton;
+    private ListView<String> transactionList;
 
     public AccountView(Account account) {
-        this.account = account;
+        setSpacing(10);
+        setPadding(new Insets(20));
+
+        accountNumberLabel = new Label("Account Number: " + account.getAccountNumber());
+        balanceLabel = new Label("Balance: BWP" + account.getBalance());
+
+        amountField = new TextField();
+        amountField.setPromptText("Enter amount");
+
+        depositButton = new Button("Deposit");
+        withdrawButton = new Button("Withdraw");
+
+        // Transaction history
+        transactionList = new ListView<>();
+        transactionList.getItems().addAll(account.getTransactions());
+
+        // Deposit action
+        depositButton.setOnAction(e -> {
+            try {
+                double amt = Double.parseDouble(amountField.getText());
+                account.deposit(amt);
+                updateBalance(account.getBalance());
+                transactionList.getItems().setAll(account.getTransactions());
+                amountField.clear();
+            } catch (NumberFormatException ex) {
+                showAlert("Invalid amount");
+            }
+        });
+
+        // Withdraw action
+        withdrawButton.setOnAction(e -> {
+            try {
+                double amt = Double.parseDouble(amountField.getText());
+                account.withdraw(amt);
+                updateBalance(account.getBalance());
+                transactionList.getItems().setAll(account.getTransactions());
+                amountField.clear();
+            } catch (NumberFormatException ex) {
+                showAlert("Invalid amount");
+            }
+        });
+
+        backButton = new Button("Back to Dashboard");
+        backButton.setOnAction(e -> {
+            SceneController.setScene(new Scene(new DashboardView(), 400, 400));
+        });
+
+        getChildren().addAll(accountNumberLabel, balanceLabel, amountField, depositButton, withdrawButton,
+                new Label("Transaction History:"), transactionList, backButton);
     }
 
-    public void show(Stage stage) {
-        Label title = new Label("🏦 Account Information");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+    private void updateBalance(double newBalance) {
+        balanceLabel.setText("Balance: BWP" + newBalance);
+    }
 
-        Label accNum = new Label("Account Number: " + account.getAccountNumber());
-        Label accType = new Label("Account Type: " + account.getClass().getSimpleName());
-        Label accBalance = new Label("Balance: BW" + account.getBalance());
-        Label accBranch = new Label("Branch: " + account.getBranch());
-        Label custName = new Label("Customer: " + account.getCustomer().getName());
-        Label custContact = new Label("Phone: " + account.getCustomer().getPhone());
-        Label custAddress = new Label("Address: " + account.getCustomer().getAddress());
-
-        VBox box = new VBox(10, title, accNum, accType, accBalance, accBranch, custName, custContact, custAddress);
-        box.setPadding(new Insets(20));
-        Scene scene = new Scene(box, 400, 300);
-
-        stage.setScene(scene);
-        stage.show();
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
