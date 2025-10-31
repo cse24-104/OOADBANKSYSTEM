@@ -1,4 +1,4 @@
-package com.example.thesystem.boundary;
+package com.example.thesystem;
 
 import com.example.thesystem.Customer;
 import com.example.thesystem.controller.SceneController;

@@ -1,5 +1,6 @@
 package com.example.thesystem;
 
+import com.example.thesystem.boundary.RegisterCustomerView;
 import com.example.thesystem.BankDatabase;
 import com.example.thesystem.boundary.DashboardView;
 import javafx.fxml.FXML;

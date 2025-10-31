@@ -1,22 +1,142 @@
-<?xml version="1.0" encoding="UTF-8"?>
+package com.example.thesystem.boundary;
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+import com.example.thesystem.controller.SceneController;
+import  com.example.thesystem.boundary.DashboardView;
+import com.example.thesystem.BankDatabase;
+import com.example.thesystem.Account;
+import com.example.thesystem.SavingsAccount;
+import com.example.thesystem.ChequeAccount;
+import com.example.thesystem.InvestmentAccount;
+import com.example.thesystem.Customer;
+import com.example.thesystem.database.DataStorage;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
-<AnchorPane prefHeight="582.0" prefWidth="628.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.thesystem.boundary.CreateAccountController">
-    <children>
-        <VBox alignment="CENTER" prefHeight="462.0" prefWidth="588.0" spacing="10" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
-            <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Create New Account" />
+public class CreateAccountView extends VBox {
+    private ComboBox<String> customerTypeBox;
+    private ComboBox<String> accountTypeBox;
+    private TextField branchField;
+    private TextField initialDepositField;
+    private TextField employerNameField;
+    private TextField employerAddressField;
+    private Button createButton;
+    private Button backButton;
+    private Label messageLabel;
 
-            <ComboBox fx:id="accountTypeBox" promptText="Select Account Type" />
-            <TextField fx:id="branchField" alignment="CENTER" prefHeight="26.0" prefWidth="480.0" promptText="Branch" />
-            <TextField fx:id="initialDepositField" alignment="CENTER" prefHeight="26.0" prefWidth="298.0" promptText="Initial Deposit" />
-            <TextField fx:id="employerNameField" alignment="CENTER" prefHeight="26.0" prefWidth="394.0" promptText="Employer Name (Cheque)" />
-            <TextField fx:id="employerAddressField" alignment="CENTER" promptText="Employer Address (Cheque)" />
+    public CreateAccountView(Customer customer) {
+        setSpacing(10);
+        setPadding(new Insets(20));
 
-            <HBox spacing="10" />
-             <Button fx:id="createButton" text="Create Account" />
-             <Button fx:id="backButton" text="Back" />
-        </VBox>
-    </children>
-</AnchorPane>
+        Label title = new Label("Open New Account");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        customerTypeBox = new ComboBox<>();
+        customerTypeBox.getItems().addAll("Individual", "Company");
+        customerTypeBox.setPromptText("Select Customer Type");
+
+        accountTypeBox = new ComboBox<>();
+        accountTypeBox.getItems().addAll("Savings", "Cheque", "Investment");
+        accountTypeBox.setPromptText("Select Account Type");
+
+        branchField = new TextField();
+        branchField.setPromptText("Branch Name");
+
+        initialDepositField = new TextField();
+        initialDepositField.setPromptText("Initial Deposit Amount");
+
+        employerNameField = new TextField();
+        employerNameField.setPromptText("Employer Name (for Cheque)");
+
+        employerAddressField = new TextField();
+        employerAddressField.setPromptText("Employer Address (for Cheque)");
+
+        createButton = new Button("Create Account");
+        messageLabel = new Label();
+
+        backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            SceneController.setScene(new Scene(new DashboardView(), 400, 350));
+        });
+
+        createButton.setOnAction(e -> createAccount());
+
+        getChildren().addAll(
+                title, customerTypeBox, accountTypeBox,
+                branchField, initialDepositField,
+                employerNameField, employerAddressField,
+                createButton, messageLabel, backButton
+        );
+    }
+
+    private void createAccount() {
+        String customerType = customerTypeBox.getValue();
+        String accountType = accountTypeBox.getValue();
+        String branch = branchField.getText().trim();
+        String initialDepositText = initialDepositField.getText().trim();
+        String employerName = employerNameField.getText().trim();
+        String employerAddress = employerAddressField.getText().trim();
+
+        if (accountType == null || branch.isEmpty() || initialDepositText.isEmpty()) {
+            messageLabel.setText("⚠️ Please fill in all required fields");
+            return;
+        }
+
+        double initialDeposit;
+        try {
+            initialDeposit = Double.parseDouble(initialDepositText);
+        } catch (NumberFormatException e) {
+            messageLabel.setText("⚠️ Invalid deposit amount");
+            return;
+        }
+
+        Customer logged = BankDatabase.getLoggedInCustomer();
+        if (logged == null) {
+            messageLabel.setText("⚠️ No logged-in customer found");
+            return;
+        }
+
+        // ✅ Generate account number
+        String accountNumber = "ACC" + System.currentTimeMillis();
+
+        Account newAccount = null;
+
+        try {
+            switch (accountType) {
+                case "Savings":
+                    newAccount = new SavingsAccount(accountNumber, branch, logged);
+                    newAccount.deposit(initialDeposit);
+                    break;
+
+                case "Cheque":
+                    if (employerName.isEmpty() || employerAddress.isEmpty()) {
+                        messageLabel.setText("⚠️ Enter employer details for cheque account");
+                        return;
+                    }
+                    newAccount = new ChequeAccount(accountNumber, branch, logged, employerName, employerAddress);
+                    newAccount.deposit(initialDeposit);
+                    break;
+
+                case "Investment":
+                    newAccount = new InvestmentAccount(accountNumber, branch, logged, initialDeposit);
+                    break;
+            }
+
+            if (newAccount != null) {
+                logged.addAccount(newAccount);
+                BankDatabase.addAccount(newAccount);
+                BankDatabase.saveAll();
+                DataStorage.saveTransaction(accountNumber, "Account Created", initialDeposit, "Initial Deposit");
+
+                messageLabel.setText("✅ Account created successfully!");
+                SceneController.setScene(new Scene(new DashboardView(), 400, 350));
+            } else {
+                messageLabel.setText("❌ Failed to create account");
+            }
+
+        } catch (Exception ex) {
+            messageLabel.setText("❌ Error: " + ex.getMessage());
+        }
+    }
+}

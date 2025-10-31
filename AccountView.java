@@ -1,82 +1,77 @@
 package com.example.thesystem.boundary;
 
-import com.example.thesystem.Account;
-import com.example.thesystem.controller.SceneController;
 import com.example.thesystem.boundary.DashboardView;
+import com.example.thesystem.boundary.TransactionHistoryView;
+import com.example.thesystem.BankDatabase;
+import com.example.thesystem.Account;
+import com.example.thesystem.*;
+import com.example.thesystem.controller.SceneController;
+import com.example.thesystem.database.DataStorage;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 public class AccountView extends VBox {
-    private Label accountNumberLabel;
-    private Label balanceLabel;
-    private TextField amountField;
-    private Button depositButton;
-    private Button withdrawButton;
-    private Button backButton;
-    private ListView<String> transactionList;
+    private final Account account;
+    private final Label balanceLabel = new Label();
+    private final TextField amountField = new TextField();
 
     public AccountView(Account account) {
+        this.account = account;
         setSpacing(10);
         setPadding(new Insets(20));
 
-        accountNumberLabel = new Label("Account Number: " + account.getAccountNumber());
-        balanceLabel = new Label("Balance: BWP" + account.getBalance());
+        Label title = new Label("Account: " + account.getAccountNumber());
+        title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        amountField = new TextField();
-        amountField.setPromptText("Enter amount");
+        balanceLabel.setText("Balance: BWP " + String.format("%.2f", account.getBalance()));
+        amountField.setPromptText("Amount");
 
-        depositButton = new Button("Deposit");
-        withdrawButton = new Button("Withdraw");
+        Button depositBtn = new Button("Deposit");
+        Button withdrawBtn = new Button("Withdraw");
+        Button txHistory = new Button("View Transactions");
+        Button back = new Button("Back");
 
-        // Transaction history
-        transactionList = new ListView<>();
-        transactionList.getItems().addAll(account.getTransactions());
+        depositBtn.setOnAction(e -> doDeposit());
+        withdrawBtn.setOnAction(e -> doWithdraw());
+        txHistory.setOnAction(e -> SceneController.setScene(new Scene(new TransactionHistoryView(account), 600, 420)));
+        back.setOnAction(e -> SceneController.setScene(new Scene(new DashboardView(), 600, 420)));
 
-        // Deposit action
-        depositButton.setOnAction(e -> {
-            try {
-                double amt = Double.parseDouble(amountField.getText());
-                account.deposit(amt);
-                updateBalance(account.getBalance());
-                transactionList.getItems().setAll(account.getTransactions());
-                amountField.clear();
-            } catch (NumberFormatException ex) {
-                showAlert("Invalid amount");
-            }
-        });
-
-        // Withdraw action
-        withdrawButton.setOnAction(e -> {
-            try {
-                double amt = Double.parseDouble(amountField.getText());
-                account.withdraw(amt);
-                updateBalance(account.getBalance());
-                transactionList.getItems().setAll(account.getTransactions());
-                amountField.clear();
-            } catch (NumberFormatException ex) {
-                showAlert("Invalid amount");
-            }
-        });
-
-        backButton = new Button("Back to Dashboard");
-        backButton.setOnAction(e -> {
-            SceneController.setScene(new Scene(new DashboardView(), 400, 400));
-        });
-
-        getChildren().addAll(accountNumberLabel, balanceLabel, amountField, depositButton, withdrawButton,
-                new Label("Transaction History:"), transactionList, backButton);
+        getChildren().addAll(title, balanceLabel, amountField, depositBtn, withdrawBtn, txHistory, back);
     }
 
-    private void updateBalance(double newBalance) {
-        balanceLabel.setText("Balance: BWP" + newBalance);
+    private void doDeposit() {
+        try {
+            double amt = Double.parseDouble(amountField.getText());
+            if (amt <= 0) throw new NumberFormatException();
+
+            account.deposit(amt);
+            DataStorage.saveTransaction(account.getAccountNumber(), "Deposit", amt, "Deposit");
+            BankDatabase.saveAll();
+            balanceLabel.setText("Balance: BWP " + String.format("%.2f", account.getBalance()));
+            amountField.clear();
+        } catch (NumberFormatException ex) {
+            new Alert(Alert.AlertType.WARNING, "Enter a valid positive amount").showAndWait();
+        }
     }
 
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void doWithdraw() {
+        try {
+            double amt = Double.parseDouble(amountField.getText());
+            if (amt <= 0) throw new NumberFormatException();
+            if (amt > account.getBalance()) {
+                new Alert(Alert.AlertType.WARNING, "Insufficient funds").showAndWait();
+                return;
+            }
+
+            account.withdraw(amt);
+            DataStorage.saveTransaction(account.getAccountNumber(), "Withdraw", amt, "Withdrawal");
+            BankDatabase.saveAll();
+            balanceLabel.setText("Balance: BWP " + String.format("%.2f", account.getBalance()));
+            amountField.clear();
+        } catch (NumberFormatException ex) {
+            new Alert(Alert.AlertType.WARNING, "Enter a valid positive amount").showAndWait();
+        }
     }
 }

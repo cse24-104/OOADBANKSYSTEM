@@ -1,15 +1,15 @@
 package com.example.thesystem;
-import com.example.thesystem.Customer;
 
+import com.example.thesystem.Customer;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Account {
-    String accountNumber;
-    double balance;
-    String branch;
-    Customer customer;
-    protected List<String> transactions = new ArrayList<>();
+    private String accountNumber;
+    private double balance;
+    private String branch;
+    private Customer customer;
+    private final List<String> transactionHistory = new ArrayList<>();
 
     public Account(String accountNumber, String branch, Customer customer) {
         this.accountNumber = accountNumber;
@@ -18,31 +18,36 @@ public abstract class Account {
         this.balance = 0.0;
     }
 
+    // extra constructor for loading with balance
+    public Account(String accountNumber, String branch, Customer customer, double balance) {
+        this(accountNumber, branch, customer);
+        this.balance = balance;
+    }
+
     public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-
-    public double getBalance() { return balance; }
-    public void setBalance(double balance) { this.balance = balance; }
-
     public String getBranch() { return branch; }
-    public void setBranch(String branch) { this.branch = branch; }
-
+    public double getBalance() { return balance; }
     public Customer getCustomer() { return customer; }
-    public void setCustomer(Customer customer) { this.customer = customer; }
+
+    protected void setBalance(double newBalance) { this.balance = newBalance; }
+
+    public List<String> getTransactionHistory() { return transactionHistory; }
+
+    public void addTransaction(String desc) {
+        transactionHistory.add(desc);
+    }
 
     public void deposit(double amount) {
-        if (amount > 0) {
-            balance += amount;
-            transactions.add("Deposited BWP" + amount);
-        }
+        if (amount <= 0) return;
+        balance += amount;
+        String record = String.format("Deposit,%.2f,%s", amount, java.time.LocalDateTime.now());
+        addTransaction(record);
     }
 
     public abstract void withdraw(double amount);
 
-    public List<String> getTransactions() { return transactions; }
-
     @Override
     public String toString() {
-        return accountNumber + " (BWP" + balance + ")";
+        return accountNumber + " - " + this.getClass().getSimpleName() + " - BWP " + String.format("%.2f", balance);
     }
 }

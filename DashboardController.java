@@ -1,13 +1,11 @@
 package com.example.thesystem;
 
-import com.example.thesystem.BankDatabase;
-import com.example.thesystem.boundary.AccountView;
-import com.example.thesystem.boundary.CreateAccountView;
-import com.example.thesystem.boundary.CustomerProfileView;
-import com.example.thesystem.boundary.LoginView;
 import com.example.thesystem.Account;
 import com.example.thesystem.Customer;
-import com.example.thesystem.*;
+import com.example.thesystem.boundary.AccountView;
+import com.example.thesystem.boundary.CreateAccountView;
+import com.example.thesystem.CustomerProfileView;
+import com.example.thesystem.boundary.LoginView;
 import com.example.thesystem.controller.SceneController;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,7 +39,8 @@ public class DashboardController {
             }
         });
 
-        createAccountButton.setOnAction(e -> SceneController.setScene(new Scene(new CreateAccountView(), 600, 400)));
+        Customer customer = null;
+        createAccountButton.setOnAction(e -> SceneController.setScene(new Scene(new CreateAccountView(customer), 600, 400)));
         profileButton.setOnAction(e -> SceneController.setScene(new Scene(new CustomerProfileView(currentCustomer), 600, 400)));
         logoutButton.setOnAction(e -> {
             BankDatabase.setLoggedInCustomer(null);

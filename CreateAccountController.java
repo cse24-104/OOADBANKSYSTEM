@@ -1,110 +1,84 @@
-package com.example.thesystem.boundary;
+package com.example.thesystem;
 
+import com.example.thesystem.boundary.DashboardView;
 import com.example.thesystem.Customer;
 import com.example.thesystem.Account;
 import com.example.thesystem.SavingsAccount;
 import com.example.thesystem.ChequeAccount;
 import com.example.thesystem.InvestmentAccount;
-import com.example.thesystem.InterestBearing;
-
-import com.example.thesystem.boundary.DashboardView;
 import com.example.thesystem.*;
 import com.example.thesystem.controller.SceneController;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.Scene;
 
-public class CreateAccountView extends VBox {
-    private ComboBox<String> accountTypeBox;
-    private TextField branchField;
-    private TextField initialDepositField;
-    private TextField employerNameField;
-    private TextField employerAddressField;
-    private Button createButton;
-    private Button backButton;
+public class CreateAccountController {
 
-    public CreateAccountView() {
-        setSpacing(10);
-        setPadding(new Insets(20));
+    @FXML private ComboBox<String> accountTypeBox;
+    @FXML private TextField branchField;
+    @FXML private TextField initialDepositField;
+    @FXML private TextField employerNameField;
+    @FXML private TextField employerAddressField;
+    @FXML private Button createButton;
+    @FXML private Button backButton;
 
-        accountTypeBox = new ComboBox<>();
+    @FXML
+    private void initialize() {
         accountTypeBox.getItems().addAll("Savings", "Cheque", "Investment");
-        accountTypeBox.setPromptText("Select Account Type");
 
-        branchField = new TextField();
-        branchField.setPromptText("Branch");
+        createButton.setOnAction(e -> createAccount());
+        backButton.setOnAction(e -> SceneController.setScene(new Scene(new DashboardView(), 600, 400)));
+    }
 
-        initialDepositField = new TextField();
-        initialDepositField.setPromptText("Initial Deposit");
+    private void createAccount() {
+        Customer currentCustomer = BankDatabase.getLoggedInCustomer();
+        if (currentCustomer == null) return;
 
-        employerNameField = new TextField();
-        employerNameField.setPromptText("Employer Name (for Cheque)");
+        String type = accountTypeBox.getValue();
+        String branch = branchField.getText();
+        double deposit;
 
-        employerAddressField = new TextField();
-        employerAddressField.setPromptText("Employer Address (for Cheque)");
+        try {
+            deposit = Double.parseDouble(initialDepositField.getText());
+        } catch (NumberFormatException e) {
+            showAlert("Enter a valid deposit amount");
+            return;
+        }
 
-        createButton = new Button("Create Account");
-        backButton = new Button("Back to Dashboard");
+        Account newAccount;
 
-        getChildren().addAll(accountTypeBox, branchField, initialDepositField,
-                employerNameField, employerAddressField, createButton, backButton);
-
-        // Handle create account
-        createButton.setOnAction(e -> {
-            Customer currentCustomer = BankDatabase.getLoggedInCustomer();
-            if (currentCustomer == null) return;
-
-            String type = accountTypeBox.getValue();
-            String branch = branchField.getText();
-            double deposit = 0;
-            try {
-                deposit = Double.parseDouble(initialDepositField.getText());
-            } catch (NumberFormatException ex) {
-                showAlert("Enter a valid deposit amount");
-                return;
-            }
-
-            Account newAccount;
-
-            try {
-                switch (type) {
-                    case "Savings":
-                        newAccount = new SavingsAccount(generateAccountNumber(), branch, currentCustomer);
-                        newAccount.deposit(deposit);
-                        break;
-                    case "Cheque":
-                        String employerName = employerNameField.getText();
-                        String employerAddress = employerAddressField.getText();
-                        newAccount = new ChequeAccount(generateAccountNumber(), branch, currentCustomer, employerName, employerAddress);
-                        newAccount.deposit(deposit);
-                        break;
-                    case "Investment":
-                        if (deposit < 500) {
-                            showAlert("Minimum deposit for Investment Account is BWP500.00");
-                            return;
-                        }
-                        newAccount = new InvestmentAccount(generateAccountNumber(), branch, currentCustomer, deposit);
-                        break;
-                    default:
-                        showAlert("Select a valid account type");
-                        return;
+        try {
+            switch (type) {
+                case "Savings" -> {
+                    newAccount = new SavingsAccount(generateAccountNumber(), branch, currentCustomer);
+                    newAccount.deposit(deposit);
                 }
-
-                currentCustomer.addAccount(newAccount);
-                showAlert("Account created successfully!", Alert.AlertType.INFORMATION);
-
-                // Return to dashboard
-                SceneController.setScene(new Scene(new DashboardView(), 400, 400));
-
-            } catch (Exception ex) {
-                showAlert("Error creating account: " + ex.getMessage());
+                case "Cheque" -> {
+                    String empName = employerNameField.getText();
+                    String empAddress = employerAddressField.getText();
+                    newAccount = new ChequeAccount(generateAccountNumber(), branch, currentCustomer, empName, empAddress);
+                    newAccount.deposit(deposit);
+                }
+                case "Investment" -> {
+                    if (deposit < 500) {
+                        showAlert("Minimum deposit for Investment Account is BWP500.00");
+                        return;
+                    }
+                    newAccount = new InvestmentAccount(generateAccountNumber(), branch, currentCustomer, deposit);
+                }
+                default -> {
+                    showAlert("Select a valid account type");
+                    return;
+                }
             }
-        });
 
-        backButton.setOnAction(e -> {
-            SceneController.setScene(new Scene(new DashboardView(), 400, 400));
-        });
+            currentCustomer.addAccount(newAccount);
+            showAlert("Account created successfully!", Alert.AlertType.INFORMATION);
+            SceneController.setScene(new Scene(new DashboardView(), 600, 400));
+
+        } catch (Exception ex) {
+            showAlert("Error creating account: " + ex.getMessage());
+        }
     }
 
     private String generateAccountNumber() {

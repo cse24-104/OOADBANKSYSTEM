@@ -1,7 +1,9 @@
 package com.example.thesystem;
 
 import com.example.thesystem.boundary.LoginView;
+import com.example.thesystem.Account;
 import com.example.thesystem.BankDatabase;
+import com.example.thesystem.Customer;
 import com.example.thesystem.Individual;
 import com.example.thesystem.controller.SceneController;
 import javafx.geometry.Insets;
@@ -10,98 +12,67 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 public class RegisterCustomerView extends VBox {
-    private TextField firstNameField;
-    private TextField lastNameField;
-    private TextField addressField;
-    private TextField phoneField;
-    private TextField emailField;
-    private TextField usernameField;
-    private PasswordField passwordField;
-    private Button registerButton;
-    private Button backButton;
+    private final TextField firstName = new TextField();
+    private final TextField lastName = new TextField();
+    private final TextField address = new TextField();
+    private final TextField phone = new TextField();
+    private final TextField email = new TextField();
+    private final TextField username = new TextField();
+    private final PasswordField password = new PasswordField();
+    private final Label message = new Label();
 
     public RegisterCustomerView() {
         setSpacing(10);
         setPadding(new Insets(20));
 
-        firstNameField = new TextField();
-        firstNameField.setPromptText("First Name");
+        Label title = new Label("Register New Individual");
+        title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        lastNameField = new TextField();
-        lastNameField.setPromptText("Last Name");
+        firstName.setPromptText("First Name");
+        lastName.setPromptText("Last Name");
+        address.setPromptText("Address");
+        phone.setPromptText("Phone");
+        email.setPromptText("Email");
+        username.setPromptText("Username");
+        password.setPromptText("Password");
 
-        addressField = new TextField();
-        addressField.setPromptText("Address");
+        Button registerBtn = new Button("Register");
+        Button backBtn = new Button("Back to Login");
 
-        phoneField = new TextField();
-        phoneField.setPromptText("Phone Number");
+        registerBtn.setOnAction(e -> handleRegister());
+        backBtn.setOnAction(e -> SceneController.setScene(new Scene(new LoginView(), 500, 380)));
 
-        emailField = new TextField();
-        emailField.setPromptText("Email");
+        getChildren().addAll(title, firstName, lastName, address, phone, email, username, password, registerBtn, backBtn, message);
+    }
 
-        usernameField = new TextField();
-        usernameField.setPromptText("Username");
+    private void handleRegister() {
+        String f = firstName.getText().trim();
+        String l = lastName.getText().trim();
+        String addr = address.getText().trim();
+        String ph = phone.getText().trim();
+        String em = email.getText().trim();
+        String u = username.getText().trim();
+        String pw = password.getText().trim();
 
-        passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
+        if (f.isEmpty() || l.isEmpty() || u.isEmpty() || pw.isEmpty()) {
+            message.setText("Fill required fields (first, last, username, password).");
+            return;
+        }
 
-        registerButton = new Button("Register");
-        backButton = new Button("Back to Login");
-
-        getChildren().addAll(
-                new Label("Register New Individual Customer"),
-                firstNameField, lastNameField, addressField,
-                phoneField, emailField, usernameField, passwordField,
-                registerButton, backButton
-        );
-
-        // Register action
-        registerButton.setOnAction(e -> {
-            try {
-                String firstName = firstNameField.getText();
-                String lastName = lastNameField.getText();
-                String address = addressField.getText();
-                int phone = Integer.parseInt(phoneField.getText());
-                String email = emailField.getText();
-                String username = usernameField.getText();
-                String password = passwordField.getText();
-
-                if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                    showAlert("Please fill all required fields");
-                    return;
-                }
-
-                // Auto-generate customer ID
-                int customerID = BankDatabase.getCustomers().size() + 1;
-
-                Individual newCustomer = new Individual(
-                        firstName, lastName, address, phone, email,
-                        customerID, "2000-01-01", "Not Specified", "Single", // default DOB, gender, marital
-                        username, password
-                );
-
-                BankDatabase.addCustomer(newCustomer);
-                showAlert("Registration successful!", Alert.AlertType.INFORMATION);
-
-                // Automatically go to login screen
-                SceneController.setScene(new Scene(new LoginView(), 400, 300));
-
-            } catch (NumberFormatException ex) {
-                showAlert("Invalid phone number");
+        // check username uniqueness
+        for (Customer c : BankDatabase.getCustomers()) {
+            if (c instanceof Individual ind && ind.getUsername().equals(u)) {
+                message.setText("Username already exists. Choose another.");
+                return;
             }
-        });
+        }
 
-        backButton.setOnAction(e -> SceneController.setScene(new Scene(new LoginView(), 400, 300)));
-    }
+        int cid = BankDatabase.getCustomers().size() + 1;
+        Individual ind = new Individual(f, l, addr, ph, em, cid, "1990-01-01", "NotSpecified", "Single", u, pw);
+        BankDatabase.addCustomer(ind);
+        message.setText("Registration successful. Go back and login.");
 
-    private void showAlert(String message) {
-        showAlert(message, Alert.AlertType.ERROR);
-    }
-
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        // return to login
+        SceneController.setScene(new Scene(new LoginView(), 500, 380));
     }
 }

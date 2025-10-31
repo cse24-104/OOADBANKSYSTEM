@@ -11,6 +11,6 @@ public class SceneController {
     }
 
     public static void setScene(Scene scene) {
-        stage.setScene(scene);
+        if (stage != null) stage.setScene(scene);
     }
 }

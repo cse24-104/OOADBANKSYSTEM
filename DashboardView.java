@@ -1,81 +1,112 @@
 package com.example.thesystem.boundary;
 
+import  com.example.thesystem.boundary.CreateAccountView;
+import  com.example.thesystem.boundary.LoginView;
+import com.example.thesystem.BankDatabase;
 import com.example.thesystem.Account;
 import com.example.thesystem.Customer;
-import com.example.thesystem.Individual;
-import com.example.thesystem.SavingsAccount;
-import com.example.thesystem.boundary.AccountView;
-import com.example.thesystem.boundary.CreateAccountView;
-import com.example.thesystem.boundary.CustomerProfileView;
-import com.example.thesystem.boundary.LoginView;
-import com.example.thesystem.controller.SceneController;
-
-import com.example.thesystem.*;
 import com.example.thesystem.controller.SceneController;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
-import com.example.thesystem.BankDatabase;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+
+import java.util.List;
 
 public class DashboardView extends VBox {
-
+    private Button viewAccountsButton;
     private Button createAccountButton;
-    private Button profileButton;
+    private Button balanceButton;
+    private Button transactionHistoryButton;
     private Button logoutButton;
 
-    private Customer currentCustomer;
+    private Customer loggedInCustomer;
 
     public DashboardView() {
+        Customer customer = null;
+        this.loggedInCustomer = customer;
+
         setSpacing(10);
         setPadding(new Insets(20));
 
-        currentCustomer = BankDatabase.getLoggedInCustomer();
-        if (currentCustomer == null) return;
-
-        Label welcomeLabel = new Label("Welcome, " + currentCustomer.getFirstName() + " " + currentCustomer.getLastName());
-
-        // List all accounts dynamically
-        ListView<Account> accountListView = new ListView<>();
-        accountListView.getItems().addAll(currentCustomer.getAccounts());
-
-        accountListView.setOnMouseClicked(event -> {
-            Account selectedAccount = accountListView.getSelectionModel().getSelectedItem();
-            if (selectedAccount != null) {
-                SceneController.setScene(new Scene(new AccountView(selectedAccount), 400, 400));
-            }
-        });
-
+        Label welcomeLabel = new Label("Welcome, " + customer.getFirstName() + "!");
+        viewAccountsButton = new Button("View My Accounts");
         createAccountButton = new Button("Open New Account");
-        profileButton = new Button("My Profile");
+        balanceButton = new Button("Check Balance");
+        transactionHistoryButton = new Button("View Transaction History");
         logoutButton = new Button("Logout");
 
-        getChildren().addAll(welcomeLabel, new Label("Your Accounts:"), accountListView, createAccountButton, profileButton, logoutButton);
+        getChildren().addAll(
+                welcomeLabel,
+                viewAccountsButton,
+                createAccountButton,
+                balanceButton,
+                transactionHistoryButton,
+                logoutButton
+        );
 
-        // Create Account action
-        createAccountButton.setOnAction(e -> {
-            if (currentCustomer instanceof Individual) {
-                SceneController.setScene(new Scene(new CreateAccountView(), 400, 400));
+        // 🔹 View Accounts
+        viewAccountsButton.setOnAction(e -> {
+            List<Account> accounts = BankDatabase.getCustomerAccounts(customer.getUsername());
+            if (accounts.isEmpty()) {
+                showAlert("No Accounts", "You don't have any accounts yet.");
             } else {
-                showAlert("Account creation is not available for Companies yet.");
+                StringBuilder sb = new StringBuilder("Your Accounts:\n");
+                for (Account acc : accounts) {
+                    sb.append("- ").append(acc.getAccountNumber())
+                            .append(" (").append(acc.getClass().getSimpleName())
+                            .append(") | Balance: BWP ").append(acc.getBalance()).append("\n");
+                }
+                showAlert("Your Accounts", sb.toString());
             }
         });
 
-        // Profile action
-        profileButton.setOnAction(e -> {
-            SceneController.setScene(new Scene(new CustomerProfileView(currentCustomer), 400, 400));
+        // 🔹 Create Account (choose type)
+        createAccountButton.setOnAction(e -> {
+            CreateAccountView createView = new CreateAccountView(customer);
+            Scene createScene = new Scene(createView, 400, 400);
+            SceneController.setScene(createScene);
         });
 
-        // Logout action
+        // 🔹 Check Balance
+        balanceButton.setOnAction(e -> {
+            List<Account> accounts = BankDatabase.getCustomerAccounts(customer.getUsername());
+            if (accounts.isEmpty()) {
+                showAlert("No Accounts", "You don't have any accounts.");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder("Account Balances:\n");
+            for (Account acc : accounts) {
+                sb.append(acc.getAccountNumber())
+                        .append(" → BWP ").append(acc.getBalance()).append("\n");
+            }
+            showAlert("Balances", sb.toString());
+        });
+
+        // 🔹 View Transaction History
+        transactionHistoryButton.setOnAction(e -> {
+            List<String> history = BankDatabase.getTransactionHistory(customer.getUsername());
+            if (history.isEmpty()) {
+                showAlert("No Transactions", "You have no transaction history.");
+            } else {
+                StringBuilder sb = new StringBuilder("Transaction History:\n");
+                for (String record : history) sb.append(record).append("\n");
+                showAlert("Transactions", sb.toString());
+            }
+        });
+
+        // 🔹 Logout
         logoutButton.setOnAction(e -> {
-            BankDatabase.setLoggedInCustomer(null);
-            SceneController.setScene(new Scene(new LoginView(), 400, 300));
+            LoginView loginView = new LoginView();
+            Scene loginScene = new Scene(loginView, 400, 300);
+            SceneController.setScene(loginScene);
         });
     }
 
-    private void showAlert(String message) {
+    private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
