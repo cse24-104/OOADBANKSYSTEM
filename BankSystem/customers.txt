@@ -1,0 +1,2 @@
+Individual,customer1,Motheo Rankopong,mrankopong@gamil.com,76415772,872516014,2005-12-03,false
+Company,customer2,MR PTYLTD,mr@gmail.com,6687154,0123,71360440,true
